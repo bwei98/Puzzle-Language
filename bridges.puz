@@ -1,0 +1,38 @@
+cell := int [1..8]
+	| horizontal as h
+	| double_horizontal as H 
+	| vertical as v
+	| double_vertical as V
+	| empty as E;
+
+//rule_horiz :=
+	([x,y] : horizontal) => 		   
+            ([x+1, y]: horizontal OR [x+1, y]: int u)
+		AND ([x-1, y]: horizontal OR [x-1, y]: int u);
+
+//rule_double_horiz :=
+	([x,y] : double_horizontal) => 		   
+            ([x+1, y]: double_horizontal OR [x+1, y]: int u)
+		AND ([x-1, y]: double_horizontal OR [x-1, y]: int u);
+
+//rule_vert :=
+	([x,y] : vertical) => 		   
+            ([x+1, y]: vertical OR [x+1, y]: int u)
+		AND ([x-1, y]: vertical OR [x-1, y]: int u);
+
+//rule_double_vert :=
+	([x,y] : double_vertical) => 		   
+            ([x+1, y]: double_vertical OR [x+1, y]: int u)
+		AND ([x-1, y]: double_vertical OR [x-1, y]: int u);
+
+//rule_counts := [x,y]: int u => 
+		    (([x+1, y]: horizontal) ? 1 : 0) 
+		    +  (([x+1, y]: double_horizontal) ? 2 : 0) 
+		    +  (([x-1, y]: horizontal) ? 1 : 0)
+            +  (([x-1, y]: double_horizontal) ? 1 : 0)
+            +  (([x, y+1]: vertical) ? 1 : 0) 
+		    +  (([x, y+1]: double_vertical) ? 2 : 0) 
+		    +  (([x, y-1]: vertical) ? 1 : 0)
+            +  (([x, y-1]: double_vertical) ? 1 : 0)
+		       = u;
+
