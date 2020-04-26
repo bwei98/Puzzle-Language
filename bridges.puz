@@ -5,10 +5,10 @@ cell := int [1..8]
 	| double_vertical as V
 	| empty as E;
 
-//rule_horiz :=
-	([x,y] : horizontal) => 		   
-            ([x+1, y]: horizontal OR [x+1, y]: int u)
-		AND ([x-1, y]: horizontal OR [x-1, y]: int u);
+rule_horiz :=
+	{[x,y] : horizontal} => 		   
+            ({[x+1, y]: horizontal} OR {[x+1, y]: int u})
+		AND ({[x-1, y]: horizontal} OR {[x-1, y]: int u});
 
 //rule_double_horiz :=
 	([x,y] : double_horizontal) => 		   
