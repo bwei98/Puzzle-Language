@@ -130,9 +130,9 @@ function rule(types, s) {
             y + '] == \'' + curr_type['type'] + '\'))' +
             s.slice(c_close + 1);
     }
-    func_content += "\t\tif (!(" + s + "))\n\t\t\treturn false;\n"
+    func_content += "\t\tif (!(" + s + "))\n\t\t\treturn [false, r, c];\n"
 
-    func_content += '\t}\n}\nreturn true;';
+    func_content += '\t}\n}\nreturn [true];';
     func_content = func_content.replace(/OR/g, '||');
     func_content = func_content.replace(/AND/g, '&&');
     func_content = func_content.replace(/NOT/g, '!');
@@ -195,8 +195,22 @@ function initialize(a_args) {
     grid = a_args;   
 }
 
+function check_rules() {
+    for(let [rule_name, func] of Object.entries(rules)) {
+        let res = func(grid);
+        if(!res[0]) {
+            console.log("Rule " + rule_name + " failed in cell [" + res[1] + ", " + res[2] + "]");
+            return false;
+        } else {
+            console.log("Rule " + rule_name + " passed in all cells");
+        }
+    }
+    return true;
+}
+
 module.exports = {
     load_file: load_file,
     set_dim: set_dim,
-    initialize: initialize
+    initialize: initialize,
+    check_rules: check_rules
 }
