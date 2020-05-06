@@ -1,3 +1,5 @@
+const __VARIABLE__ = "typeisvariableflag";
+
 function cell(s) {
     let i;
     if ((i = s.indexOf(':=')) < 0) {
@@ -75,9 +77,12 @@ function parse_type(types, s) {
         for (let t in types) {
             if (t != 'int') continue;
             out['type'] = 'int';
-            // TODO finish this
+            out['type_var'] = parts[1];
         }
-        if (out['type'] == undefined) throw "Syntax Error: type could not be parsed";
+    }
+    if (out['type'] == undefined) {
+        out['type'] = __VARIABLE__;
+        out['type_var'] = type_str;
     }
     cell_str = cell_str.substring(1, cell_str.length - 1);
     let cell_vars = cell_str.split(',');
@@ -97,8 +102,10 @@ function rule(types, s) {
     if ((i = s.indexOf('=>')) < 0) {
         throw "Syntax Error: Rule does not contain \'=>\'";
     }
+
+
     let func_content = 'const grid_rows = grid.length;\n' +
-        'const grid_cols = grid[0].length;\n' +
+        'const grid_cols = grid[0].length;\n' + 
         'for(let r = 0; r < grid_rows; r++) {\n' +
         '\tfor(let c = 0; c < grid_cols; c++) {\n';
 
@@ -112,8 +119,21 @@ function rule(types, s) {
     pred_type = parse_type(types, predicate);
     let r = pred_type['cell_vars'][0],
         c = pred_type['cell_vars'][1];
+
+
     func_content += '\t\tlet ' + r + ' = r; let ' + c + ' = c;\n';
-    func_content += '\t\tif (grid[' + r + '][' + c + '] != \'' + pred_type['type'] + '\') continue;\n'
+    if (pred_type['type'] == __VARIABLE__) {
+        func_content += '\t\tlet ' + pred_type['type_var'] + ' = grid[' + r + '][' + c + '][\'type\'];\n';
+        pred_type['type'] = pred_type['type_var'];
+    } else {
+        func_content += '\t\tif (grid[' + r + '][' + c + '][\'type\'] != \'' + pred_type['type'] + '\') continue;\n'
+    }
+    if (pred_type['type'] == 'int') {
+        func_content += '\t\tlet ' + pred_type['type_var'] + ' = grid[' + r + '][' + c + '][\'value\'];\n';
+        pred_type['type'] = pred_type['type_var'];
+    } 
+
+
     s = s.substring(i + 2).trim();
     while (s.indexOf('{') >= 0) {
         const c_open = s.indexOf('{');
@@ -123,11 +143,13 @@ function rule(types, s) {
         }
         let current = s.substring(c_open + 1, c_close);
         curr_type = parse_type(types, current);
+        if (curr_type['type'] == __VARIABLE__) curr_type['type'] = curr_type['type_var'];
+        else curr_type['type'] = '\'' + curr_type['type'] + '\'';
         let x = curr_type['cell_vars'][0],
             y = curr_type['cell_vars'][1]
         s = s.slice(0, c_open) + '((' + x + ')< 0 || (' + x + ') >= grid_rows || (' +
             y + ') < 0 || (' + y + ') >= grid_cols || (grid[' + x + '][' +
-            y + '] == \'' + curr_type['type'] + '\'))' +
+            y + '][\'type\'] == ' + curr_type['type'] + '))' +
             s.slice(c_close + 1);
     }
     func_content += "\t\tif (!(" + s + "))\n\t\t\treturn [false, r, c];\n"
@@ -137,7 +159,9 @@ function rule(types, s) {
     func_content = func_content.replace(/AND/g, '&&');
     func_content = func_content.replace(/NOT/g, '!');
 
-
+    console.log("----------------------");
+    console.log(func_content);
+    console.log("------------------------");
     out['func'] = new Function('grid', func_content);
     return out;
 }
@@ -192,13 +216,25 @@ function initialize(a_args) {
             throw "Error: Invalid dimension";
         }
     }
-    grid = a_args;   
+    grid = a_args;
+    for(let i = 0; i < grid.length; i++) {
+        for(let j = 0; j < grid[i].length; j++) {
+            let tmp = grid[i][j];
+            grid[i][j] = {};
+            if (typeof tmp ==='number') {
+                grid[i][j]['type'] = 'int';
+                grid[i][j]['value'] = tmp;
+            } else {
+                grid[i][j]['type'] = tmp;
+            }
+        }
+    }
 }
 
 function check_rules() {
-    for(let [rule_name, func] of Object.entries(rules)) {
+    for (let [rule_name, func] of Object.entries(rules)) {
         let res = func(grid);
-        if(!res[0]) {
+        if (!res[0]) {
             console.log("Rule " + rule_name + " failed in cell [" + res[1] + ", " + res[2] + "]");
             return false;
         } else {
@@ -207,6 +243,7 @@ function check_rules() {
     }
     return true;
 }
+
 
 module.exports = {
     load_file: load_file,

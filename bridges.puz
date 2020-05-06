@@ -5,15 +5,21 @@ cell := int [1..8]
 	| double_vertical as V
 	| empty as E;
 
+//rule_typematch :=
+	{[x,y] : t} =>
+			({[x,y] : int u}) OR (
+            ({[x+1, y]: t} OR {[x+1, y]: int u})
+		AND ({[x-1, y]: t} OR {[x-1, y]: int u}));
+
 rule_horiz :=
 	{[x,y] : horizontal} => 		   
-            ({[x+1, y]: horizontal} OR {[x+1, y]: int u})
-		AND ({[x-1, y]: horizontal} OR {[x-1, y]: int u});
+            ({[x, y+1]: horizontal} OR {[x, y+1]: int u})
+		AND ({[x, y+1]: horizontal} OR {[x, y+1]: int u});
 
 rule_double_horiz :=
 	{[x,y] : double_horizontal} => 		   
-            ({[x+1, y]: double_horizontal} OR {[x+1, y]: int u})
-		AND ({[x-1, y]: double_horizontal} OR {[x-1, y]: int u});
+            ({[x, y+1]: double_horizontal} OR {[x, y+1]: int u})
+		AND ({[x, y-1]: double_horizontal} OR {[x, y-1]: int u});
 
 rule_vert :=
 	{[x,y] : vertical} => 		   
@@ -25,14 +31,13 @@ rule_double_vert :=
             ({[x+1, y]: double_vertical} OR {[x+1, y]: int u})
 		AND ({[x-1, y]: double_vertical} OR {[x-1, y]: int u});
 
-//rule_counts := [x,y]: int u => 
-		    (([x+1, y]: horizontal) ? 1 : 0) 
-		    +  (([x+1, y]: double_horizontal) ? 2 : 0) 
-		    +  (([x-1, y]: horizontal) ? 1 : 0)
-            +  (([x-1, y]: double_horizontal) ? 1 : 0)
-            +  (([x, y+1]: vertical) ? 1 : 0) 
-		    +  (([x, y+1]: double_vertical) ? 2 : 0) 
-		    +  (([x, y-1]: vertical) ? 1 : 0)
-            +  (([x, y-1]: double_vertical) ? 1 : 0)
+rule_counts := {[x,y]: int u} => 
+		    ({[x, y+1]: horizontal} ? 1 : 0) 
+		    +  ({[x, y+1]: double_horizontal} ? 2 : 0) 
+		    +  ({[x, y-1]: horizontal} ? 1 : 0)
+            +  ({[x, y-1]: double_horizontal} ? 1 : 0)
+            +  ({[x+1, y]: vertical} ? 1 : 0) 
+		    +  ({[x+1, y]: double_vertical} ? 2 : 0) 
+		    +  ({[x-1, y]: vertical} ? 1 : 0)
+            +  ({[x-1, y]: double_vertical} ? 1 : 0)
 		       == u;
-
