@@ -12,8 +12,15 @@ function cell(s) {
     types.forEach(t => {
         t = t.trim();
         if (t.substring(0, 3) == 'int') {
+            out['int'] = {};
             if (reserved_ints.length != 0) {
                 throw "Syntax Error: Redefinition of integer";
+            }
+            let is_index = t.indexOf('is');
+            if (is_index != -1) {
+                let [ints, prop] = t.split('is');
+                out['int']['prop'] = prop.trim();
+                t = ints;
             }
             let open = t.indexOf('[');
             let close = t.indexOf(']');
@@ -32,7 +39,7 @@ function cell(s) {
                     ]);
                 }
             });
-            out['int'] = reserved_ints;
+            out['int']['vals'] = reserved_ints;
         }
     });
     types.forEach(t => {
@@ -42,14 +49,32 @@ function cell(s) {
             let as_index = t.indexOf('as');
             if (as_index != -1) {
                 let [long, short] = t.split('as');
+                let is_index = short.indexOf('is');
+                if (is_index == -1) {
+                    short = short.trim();
+                    out[short] = {};
+                } else {
+                    let [sht, prop] = short.split('is');
+                    short = sht.trim();
+                    out[short] = {};
+                    out[short]['prop'] = prop.trim();
+                }                    
                 long = long.trim();
-                short = short.trim();
-                out[short] = long;
+                out[short]['name'] = long;
             } else {
-                out[t] = t;
+                let is_index = t.indexOf('is');
+                if (is_index != -1) {
+                    let [t, prop] = t.split('is');
+                    out[t] = {};
+                    out[t]['prop'] = prop.trim();
+                } else {
+                    out[t] = {};
+                }
+                out[t]['name'] = t;
             }
         }
     });
+
     return out;
 }
 
@@ -62,8 +87,8 @@ function parse_type(types, s) {
     let cell_str = s.substring(0, colon).trim();
     let type_str = s.substring(colon + 1).trim();
     if (type_str.indexOf(' ') < 0) {
-        for (let t in types) {
-            if (type_str == t || type_str == types[t]) {
+        for (let [t, data] of Object.entries(types)) {
+            if (type_str == t || type_str == data['name']) {
                 out['type'] = t;
                 break;
             }
@@ -105,9 +130,8 @@ function rule(types, s) {
 
 
     let func_content = 'const grid_rows = grid.length;\n' +
-        'const grid_cols = grid[0].length;\n' + 
-        'for(let r = 0; r < grid_rows; r++) {\n' +
-        '\tfor(let c = 0; c < grid_cols; c++) {\n';
+        'const grid_cols = grid[0].length;\n';
+
 
     let predicate = s.substring(0, i).trim();
     const t_open = predicate.indexOf('{');
@@ -119,9 +143,10 @@ function rule(types, s) {
     pred_type = parse_type(types, predicate);
     let r = pred_type['cell_vars'][0],
         c = pred_type['cell_vars'][1];
+    func_content += 'for(let ' + r + ' = 0; ' + r + ' < grid_rows; ' + r + '++) {\n' +
+                    'for(let ' + c + ' = 0; ' + c + ' < grid_cols; ' + c + '++) {\n';
 
-
-    func_content += '\t\tlet ' + r + ' = r; let ' + c + ' = c;\n';
+    // func_content += '\t\tlet ' + r + ' = r; let ' + c + ' = c;\n';
     if (pred_type['type'] == __VARIABLE__) {
         func_content += '\t\tlet ' + pred_type['type_var'] + ' = grid[' + r + '][' + c + '][\'type\'];\n';
         pred_type['type'] = pred_type['type_var'];
@@ -146,22 +171,24 @@ function rule(types, s) {
         if (curr_type['type'] == __VARIABLE__) curr_type['type'] = curr_type['type_var'];
         else curr_type['type'] = '\'' + curr_type['type'] + '\'';
         let x = curr_type['cell_vars'][0],
-            y = curr_type['cell_vars'][1]
+            y = curr_type['cell_vars'][1];
         s = s.slice(0, c_open) + '((' + x + ')< 0 || (' + x + ') >= grid_rows || (' +
             y + ') < 0 || (' + y + ') >= grid_cols || (grid[' + x + '][' +
             y + '][\'type\'] == ' + curr_type['type'] + '))' +
             s.slice(c_close + 1);
     }
-    func_content += "\t\tif (!(" + s + "))\n\t\t\treturn [false, r, c];\n"
+    func_content += '\t\tif (!(' + s + '))\n\t\t\treturn [false, ' + r + ', ' + c + '];\n'
 
     func_content += '\t}\n}\nreturn [true];';
     func_content = func_content.replace(/OR/g, '||');
     func_content = func_content.replace(/AND/g, '&&');
     func_content = func_content.replace(/NOT/g, '!');
 
-    console.log("----------------------");
-    console.log(func_content);
-    console.log("------------------------");
+    // x => y  ====  not x or y
+
+    // console.log("----------------------");
+    // console.log(func_content);
+    // console.log("------------------------");
     out['func'] = new Function('grid', func_content);
     return out;
 }
@@ -184,7 +211,9 @@ function parse(str) {
             rules[next_rule['name']] = next_rule['func'];
         }
     });
-    return types, rules;
+    console.log(types);
+    console.log(rules);
+    return [types, rules];
 }
 
 let program_string = "";
@@ -194,7 +223,7 @@ let grid;
 function load_file(fname) {
     const fs = require('fs');
     program_string = fs.readFileSync(fname).toString();
-    types, rules = parse(program_string);
+    [types, rules] = parse(program_string);
 }
 
 function set_dim(r, c) {
@@ -231,17 +260,56 @@ function initialize(a_args) {
     }
 }
 
-function check_rules() {
+function check_rules(arggrid,silent=false) {
+    if (arggrid == undefined) arggrid = grid;
     for (let [rule_name, func] of Object.entries(rules)) {
-        let res = func(grid);
+        let res = func(arggrid);
         if (!res[0]) {
-            console.log("Rule " + rule_name + " failed in cell [" + res[1] + ", " + res[2] + "]");
+            if(!silent) console.log("Rule " + rule_name + " failed in cell [" + res[1] + ", " + res[2] + "]");
             return false;
         } else {
-            console.log("Rule " + rule_name + " passed in all cells");
+            if(!silent) console.log("Rule " + rule_name + " passed in all cells");
         }
     }
     return true;
+}
+
+function solve() {
+    let mutates = [], places = [];
+    for (let [t, data] of Object.entries(types)) {
+        if (data['prop'] == 'place') {
+            places.push(t);
+        } else if (data['prop'] == 'mutate') {
+            mutates.push(t);
+        }
+    }
+
+    const iters = places.length * grid.length * grid[0].length;
+    let gcopy = new Array(grid.length);
+    for(let i = 0; i < iters; i++) {
+        for(let r = 0; r < grid.length; r++) {
+            gcopy[r] = new Array(grid[r].length);
+            for(let c = 0; c < grid[r].length; c++) {
+                gcopy[r][c] = {};
+                for(let [k,v] of Object.entries(grid[r][c])) {
+                    gcopy[r][c][k] = v;
+                }
+            }
+        }
+
+        for(let r = 0; r < gcopy.length; r++) {
+            for(let c = 0; c < gcopy[r].length; c++) {
+                if (mutates.includes(gcopy[r][c]['type'])) {
+                    let rand = Math.floor(Math.random() * (1 + places.length));
+                    if (rand != places.length)
+                        gcopy[r][c]['type'] = places[rand];
+                }
+            }
+        }
+        if (check_rules(gcopy, silent=true)) return gcopy;
+    }
+    console.log("Unable to find a solution");
+    
 }
 
 
@@ -249,5 +317,6 @@ module.exports = {
     load_file: load_file,
     set_dim: set_dim,
     initialize: initialize,
-    check_rules: check_rules
+    check_rules: check_rules,
+    solve: solve
 }
