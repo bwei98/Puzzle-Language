@@ -58,7 +58,7 @@ function cell(s) {
                     short = sht.trim();
                     out[short] = {};
                     out[short]['prop'] = prop.trim();
-                }                    
+                }
                 long = long.trim();
                 out[short]['name'] = long;
             } else {
@@ -156,7 +156,7 @@ function rule(types, s) {
     if (pred_type['type'] == 'int') {
         func_content += '\t\tlet ' + pred_type['type_var'] + ' = grid[' + r + '][' + c + '][\'value\'];\n';
         pred_type['type'] = pred_type['type_var'];
-    } 
+    }
 
 
     s = s.substring(i + 2).trim();
@@ -172,8 +172,8 @@ function rule(types, s) {
         else curr_type['type'] = '\'' + curr_type['type'] + '\'';
         let x = curr_type['cell_vars'][0],
             y = curr_type['cell_vars'][1];
-        s = s.slice(0, c_open) + '((' + x + ')< 0 || (' + x + ') >= grid_rows || (' +
-            y + ') < 0 || (' + y + ') >= grid_cols || (grid[' + x + '][' +
+        s = s.slice(0, c_open) + '((' + x + ') >= 0 && (' + x + ') < grid_rows && (' +
+            y + ') >= 0 && (' + y + ') < grid_cols && (grid[' + x + '][' +
             y + '][\'type\'] == ' + curr_type['type'] + '))' +
             s.slice(c_close + 1);
     }
@@ -186,9 +186,9 @@ function rule(types, s) {
 
     // x => y  ====  not x or y
 
-    // console.log("----------------------");
-    // console.log(func_content);
-    // console.log("------------------------");
+    console.log("----------------------");
+    console.log(func_content);
+    console.log("------------------------");
     out['func'] = new Function('grid', func_content);
     return out;
 }
@@ -284,7 +284,7 @@ function solve() {
         }
     }
 
-    const iters = places.length * grid.length * grid[0].length;
+  const iters = Math.pow(places.length, grid.length * grid[0].length);
     let gcopy = new Array(grid.length);
     for(let i = 0; i < iters; i++) {
         for(let r = 0; r < grid.length; r++) {
@@ -309,7 +309,7 @@ function solve() {
         if (check_rules(gcopy, silent=true)) return gcopy;
     }
     console.log("Unable to find a solution");
-    
+
 }
 
 
