@@ -1,44 +1,38 @@
 cell := int [1..8]
-	| horizontal as h is place
-	| double_horizontal as H is place
-	| vertical as v is place
-	| double_vertical as V is place
-	| empty as E is mutate;
-
-//rule_typematch :=
-	{[x,y] : t} =>
-			({[x,y] : int u}) OR (
-            ({[x+1, y]: t} OR {[x+1, y]: int u})
-		AND ({[x-1, y]: t} OR {[x-1, y]: int u}));
+  | horizontal as h is place
+  | double_horizontal as H is place
+  | vertical as v is place
+  | double_vertical as V is place
+  | empty as E is mutate;
 
 rule_horiz :=
-	{[x,y] : horizontal} =>
+  {[x,y] : horizontal} =>
             ({[x, y+1]: horizontal} OR {[x, y+1]: int u})
-		AND ({[x, y-1]: horizontal} OR {[x, y-1]: int u});
+        AND ({[x, y-1]: horizontal} OR {[x, y-1]: int u});
 
 rule_double_horiz :=
-	{[x,y] : double_horizontal} =>
+  {[x,y] : double_horizontal} =>
             ({[x, y+1]: double_horizontal} OR {[x, y+1]: int u})
-		AND ({[x, y-1]: double_horizontal} OR {[x, y-1]: int u});
+        AND ({[x, y-1]: double_horizontal} OR {[x, y-1]: int u});
 
 rule_vert :=
-	{[x,y] : vertical} =>
+  {[x,y] : vertical} =>
             ({[x+1, y]: vertical} OR {[x+1, y]: int u})
-		AND ({[x-1, y]: vertical} OR {[x-1, y]: int u});
+        AND ({[x-1, y]: vertical} OR {[x-1, y]: int u});
 
 rule_double_vert :=
-	{[x,y] : double_vertical} =>
+  {[x,y] : double_vertical} =>
             ({[x+1, y]: double_vertical} OR {[x+1, y]: int u})
-		AND ({[x-1, y]: double_vertical} OR {[x-1, y]: int u});
+        AND ({[x-1, y]: double_vertical} OR {[x-1, y]: int u});
 
 rule_counts :=
-	{[x,y]: int u} =>
-			({[x, y+1]: horizontal} ? 1 : 0)
-		    +  ({[x, y+1]: double_horizontal} ? 2 : 0)
-		    +  ({[x, y-1]: horizontal} ? 1 : 0)
-            +  ({[x, y-1]: double_horizontal} ? 2 : 0)
-            +  ({[x+1, y]: vertical} ? 1 : 0)
-		    +  ({[x+1, y]: double_vertical} ? 2 : 0)
-		    +  ({[x-1, y]: vertical} ? 1 : 0)
-            +  ({[x-1, y]: double_vertical} ? 2 : 0)
-		       == u;
+  {[x,y]: int u} =>
+            ({[x, y+1]: horizontal} ? 1 : 0)
+          + ({[x, y+1]: double_horizontal} ? 2 : 0)
+          + ({[x, y-1]: horizontal} ? 1 : 0)
+          + ({[x, y-1]: double_horizontal} ? 2 : 0)
+          + ({[x+1, y]: vertical} ? 1 : 0)
+          + ({[x+1, y]: double_vertical} ? 2 : 0)
+          + ({[x-1, y]: vertical} ? 1 : 0)
+          + ({[x-1, y]: double_vertical} ? 2 : 0)
+          == u;
