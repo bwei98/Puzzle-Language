@@ -10,13 +10,14 @@ You can interact in the repl with any valid javascript code as it is simply a js
 However, there are special functionality for the puzzle language.  The following functions can be called:
 
 ```
-p.load_puzzle(filename) -- Load the cells and rules described in the file
-p.load_grid(filename) -- Load a puzzle grid from the file (see example file 'bridges-1.grid')
-p.set_dim(r,c) -- Set the dimensions of the board to have r rows and c cols
-p.initialize(board) -- Set the initial configuration of the board; should be a 2-dimensional array
-p.inspect() -- Prints current board content, and also checks all rules
-p.check_rules() -- Returns true if all rules are satisfied, false otherwise
-p.solve() -- Solve for a board which satisfies all rules, or indicates if it is not possible
+p.load_puzzle(filename)    -- Load the cells and rules described in the file
+p.load_grid(filename)      -- Load a puzzle grid from the file (see example file `bridges-1.grid`)
+p.set_dim(r,c)             -- Set the dimensions of the board to have r rows and c cols
+p.initialize(board)        -- Set the initial configuration of the board; should be a 2-dimensional array
+p.inspect()                -- Prints current board content, and also checks all rules
+p.check_rules()            -- Returns true if all rules are satisfied, false otherwise
+p.solve()                  -- Solve for a board which satisfies all rules, or indicates if it is not possible
+p.help()                   -- Print this help message
 ```
 
 ## The Puzzle Language

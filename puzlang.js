@@ -312,7 +312,7 @@ function solve() {
         }
     }
 
-  const iters = Math.min(Math.pow(places.length, grid.length * grid[0].length), 100000);
+  const iters = Math.pow(places.length, grid.length * grid[0].length);
     let gcopy = new Array(grid.length);
     for(let i = 0; i < iters; i++) {
         for(let r = 0; r < grid.length; r++) {
@@ -344,6 +344,17 @@ function solve() {
 
 }
 
+function help() {
+    console.log('p.load_puzzle(filename)    -- Load the cells and rules described in the file');
+    console.log('p.load_grid(filename)      -- Load a puzzle grid from the file (see example file `bridges-1.grid`)');
+    console.log('p.set_dim(r,c)             -- Set the dimensions of the board to have r rows and c cols');
+    console.log('p.initialize(board)        -- Set the initial configuration of the board; should be a 2-dimensional array');
+    console.log('p.inspect()                -- Prints current board content, and also checks all rules');
+    console.log('p.check_rules()            -- Returns true if all rules are satisfied, false otherwise');
+    console.log('p.solve()                  -- Solve for a board which satisfies all rules, or indicates if it is not possible');
+    console.log('p.help()                   -- Print this help message');
+}
+
 
 module.exports = {
     load_puzzle: load_puzzle,
@@ -352,5 +363,6 @@ module.exports = {
     initialize: initialize,
     inspect: inspect,
     check_rules: check_rules,
-    solve: solve
+    solve: solve,
+    help: help
 }
