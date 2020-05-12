@@ -11,8 +11,10 @@ However, there are special functionality for the puzzle language.  The following
 
 ```
 p.load_puzzle(filename) -- Load the cells and rules described in the file
+p.load_grid(filename) -- Load a puzzle grid from the file (see example file 'bridges-1.grid')
 p.set_dim(r,c) -- Set the dimensions of the board to have r rows and c cols
 p.initialize(board) -- Set the initial configuration of the board; should be a 2-dimensional array
+p.inspect() -- Prints current board content, and also checks all rules
 p.check_rules() -- Returns true if all rules are satisfied, false otherwise
 p.solve() -- Solve for a board which satisfies all rules, or indicates if it is not possible
 ```
@@ -57,7 +59,7 @@ bash> node repl.js
 2. Load the file ``bridges.puz``.  This file contains cells and rules for the game bridges.  A description can be found
 [here](https://en.wikipedia.org/wiki/Hashiwokakero).
 ```
-puz_repl> p.load_file('bridges.puz')
+puz_repl> p.load_puzzle('bridges.puz')
 ```
 3. Set the dimensions of a board to 3x3 and initialize it as follows
 ```

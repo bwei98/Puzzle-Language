@@ -223,9 +223,33 @@ function load_puzzle(fname) {
     [types, rules] = parse(program_string);
 }
 
+function load_grid(fname) {
+    const fs = require('fs');
+    data = (fs.readFileSync(fname, 'utf8')).split('\n');
+    rc = data[0].split(' ');
+    r = parseInt(rc[0]);
+    c = parseInt(rc[1]);
+    grid = new Array(r);
+    for (let i = 0; i < r; i++) {
+        grid[i] = data[i + 1].split(' ').slice(0, 7);
+        for (let j = 0; j < c; j++) {
+            if (!isNaN(parseInt(grid[i][j]))) {
+                grid[i][j] = {
+                    type: 'int',
+                    value: parseInt(grid[i][j])
+                };
+            } else {
+                grid[i][j] = {
+                    type: grid[i][j]
+                }
+            }
+        }
+    }
+}
+
 function set_dim(r, c) {
     grid = new Array(r);
-    for (let i = 0; i < c; i++) {
+    for (let i = 0; i < r; i++) {
         grid[i] = new Array(c);
     }
 }
@@ -257,6 +281,13 @@ function initialize(a_args) {
     }
 }
 
+function inspect() {
+  for (let i = 0; i < grid.length; i++) {
+    console.log(grid[i].map(e => e.type === 'int' ? e.value : e.type).join('\t'));
+  }
+  check_rules();
+}
+
 function check_rules(arggrid,silent=false) {
     if (arggrid == undefined) arggrid = grid;
     for (let [rule_name, func] of Object.entries(rules)) {
@@ -281,7 +312,7 @@ function solve() {
         }
     }
 
-  const iters = Math.pow(places.length, grid.length * grid[0].length);
+  const iters = Math.max(Math.pow(places.length, grid.length * grid[0].length), 100000);
     let gcopy = new Array(grid.length);
     for(let i = 0; i < iters; i++) {
         for(let r = 0; r < grid.length; r++) {
@@ -312,8 +343,10 @@ function solve() {
 
 module.exports = {
     load_puzzle: load_puzzle,
+    load_grid: load_grid,
     set_dim: set_dim,
     initialize: initialize,
+    inspect: inspect,
     check_rules: check_rules,
     solve: solve
 }
