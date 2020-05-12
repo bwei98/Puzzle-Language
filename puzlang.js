@@ -312,7 +312,7 @@ function solve() {
         }
     }
 
-  const iters = Math.max(Math.pow(places.length, grid.length * grid[0].length), 100000);
+  const iters = Math.min(Math.pow(places.length, grid.length * grid[0].length), 100000);
     let gcopy = new Array(grid.length);
     for(let i = 0; i < iters; i++) {
         for(let r = 0; r < grid.length; r++) {
@@ -335,6 +335,7 @@ function solve() {
             }
         }
       if (check_rules(gcopy, silent=true)) {
+        grid = gcopy;
         inspect();
         return;
       };
