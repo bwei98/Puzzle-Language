@@ -334,7 +334,10 @@ function solve() {
                 }
             }
         }
-        if (check_rules(gcopy, silent=true)) return gcopy;
+      if (check_rules(gcopy, silent=true)) {
+        inspect();
+        return;
+      };
     }
     console.log("Unable to find a solution");
 
