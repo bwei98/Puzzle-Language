@@ -5,12 +5,12 @@
 I'm not actually sure, but any reasonable Node JS installation should be fine.
 
 ## Running The Code
-Run in the working directory ``node puzzle_repl.js``.  This opens the puzzle language repl.
+Run in the working directory ``node repl.js``.  This opens the puzzle language repl.
 You can interact in the repl with any valid javascript code as it is simply a js repl.
 However, there are special functionality for the puzzle language.  The following functions can be called:
 
 ```
-p.load_file(filename) -- Load the cells and rules described in the file
+p.load_puzzle(filename) -- Load the cells and rules described in the file
 p.set_dim(r,c) -- Set the dimensions of the board to have r rows and c cols
 p.initialize(board) -- Set the initial configuration of the board; should be a 2-dimensional array
 p.check_rules() -- Returns true if all rules are satisfied, false otherwise
@@ -52,7 +52,7 @@ board which is out of bounds is checked automatically and defaulted to false.
 ## Example Walkthrough
 1. Spin up the repl
 ```
-bash> node puzzle_repl.js
+bash> node repl.js
 ```
 2. Load the file ``bridges.puz``.  This file contains cells and rules for the game bridges.  A description can be found
 [here](https://en.wikipedia.org/wiki/Hashiwokakero).

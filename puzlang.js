@@ -186,9 +186,6 @@ function rule(types, s) {
 
     // x => y  ====  not x or y
 
-    console.log("----------------------");
-    console.log(func_content);
-    console.log("------------------------");
     out['func'] = new Function('grid', func_content);
     return out;
 }
@@ -220,7 +217,7 @@ let program_string = "";
 let types, rules;
 let grid;
 
-function load_file(fname) {
+function load_puzzle(fname) {
     const fs = require('fs');
     program_string = fs.readFileSync(fname).toString();
     [types, rules] = parse(program_string);
@@ -314,7 +311,7 @@ function solve() {
 
 
 module.exports = {
-    load_file: load_file,
+    load_puzzle: load_puzzle,
     set_dim: set_dim,
     initialize: initialize,
     check_rules: check_rules,
